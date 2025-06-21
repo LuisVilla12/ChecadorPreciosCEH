@@ -1,11 +1,18 @@
 import tkinter as tk
-from PIL import Image, ImageTk, ImageOps
+from PIL import Image, ImageTk
 from conexion import obtener_producto_por_codigo
+import os
 
 def buscar_producto():
-    codigo = entry_codigo.get()
+    codigo = entry_codigo.get().strip()
+    if not codigo:
+        return
+
     nombre, precio = obtener_producto_por_codigo(codigo)
-    
+
+    # Ocultar frame de entrada (fila 0)
+    frame_superior.grid_remove()
+
     if nombre:
         etiqueta_producto.config(text=nombre.upper())
         etiqueta_precio.config(text=f"$ {precio:.2f}")
@@ -13,54 +20,60 @@ def buscar_producto():
         etiqueta_producto.config(text="NO ENCONTRADO")
         etiqueta_precio.config(text="$ 0.00")
 
-    # Esperar 5 segundos y limpiar entrada
-    ventana.after(5000, limpiar)
+    ventana.after(5000, restaurar_interfaz)
 
-def limpiar():
+def restaurar_interfaz():
     entry_codigo.delete(0, tk.END)
+    entry_codigo.focus()
+
+    # Volver a mostrar el frame de entrada (fila 0)
+    frame_superior.grid()
     etiqueta_producto.config(text="")
     etiqueta_precio.config(text="")
-    entry_codigo.focus()
 
 # Ventana principal
 ventana = tk.Tk()
 ventana.attributes('-fullscreen', True)
-ventana.configure(bg="#D9D9D9")  # fondo gris claro
+ventana.configure(bg="#D9D9D9")
 
-# Cargar y mostrar logo
+# Usamos grid para controlar ubicación
+ventana.rowconfigure([0, 1, 2], weight=1)
+ventana.columnconfigure(0, weight=1)
+
+# Frame para logo + input (fila 0)
+frame_superior = tk.Frame(ventana, bg="#D9D9D9")
+frame_superior.grid(row=0, column=0)
+
+# Cargar logo
 try:
-    logo_img = Image.open("logo_a.png")
+    ruta_logo = os.path.join(os.path.dirname(__file__), "logo_a.png")
+    logo_img = Image.open(ruta_logo)
     logo_img = logo_img.resize((700, 300), Image.Resampling.LANCZOS)
     logo = ImageTk.PhotoImage(logo_img)
-    tk.Label(ventana, image=logo, bg="#D9D9D9").pack(pady=10)
+    logo_label = tk.Label(frame_superior, image=logo, bg="#D9D9D9")
 except Exception as e:
     print(e)
-    tk.Label(ventana, text="LOGO NO ENCONTRADO", font=("Helvetica", 28), fg="black", bg="#D9D9D9").pack(pady=10)
+    logo_label = tk.Label(frame_superior, text="LOGO NO ENCONTRADO", font=("Helvetica", 28), fg="black", bg="#D9D9D9")
 
-# # Instrucción
-# tk.Label(
-#     ventana,
-#     text="Coloca el código bajo el escáner para obtener el precio",
-#     font=("Helvetica", 24),
-#     fg="black",
-#     bg="#D9D9D9"
-# ).pack()
+logo_label.pack()
 
-# Entrada de código
-entry_codigo = tk.Entry(ventana, font=("Helvetica", 36), width=25, justify='center')
-entry_codigo.pack(pady=30)
+# Input
+entry_codigo = tk.Entry(frame_superior, font=("Helvetica", 36), width=25, justify='center')
+entry_codigo.pack(pady=20)
 entry_codigo.focus()
 entry_codigo.bind('<Return>', lambda e: buscar_producto())
 
-# Resultado nombre
-etiqueta_producto = tk.Label(ventana, text="", font=("Helvetica", 40, "bold"), fg="black", bg="#D9D9D9")
-etiqueta_producto.pack(pady=20)
+# Resultado precio (fila 2)
+etiqueta_precio = tk.Label(ventana, text="", font=("Helvetica", 120, "bold"), fg="black", bg="#D9D9D9")
+etiqueta_precio.grid(row=1, column=0)
 
-# Resultado precio
-etiqueta_precio = tk.Label(ventana, text="", font=("Helvetica", 60, "bold"), fg="black", bg="#D9D9D9")
-etiqueta_precio.pack()
+# Resultado producto (fila 1)
+etiqueta_producto = tk.Label(ventana, text="", font=("Helvetica", 30, "bold"), fg="black", bg="#D9D9D9")
+etiqueta_producto.grid(row=2, column=0)
+
 
 # Salida con ESC
 ventana.bind('<Escape>', lambda e: ventana.destroy())
 
 ventana.mainloop()
+

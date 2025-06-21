@@ -3,8 +3,8 @@ import pyodbc
 def conectar_bd():
     try:
         conexion = pyodbc.connect(
-            'DRIVER={ODBC Driver 17 for SQL Server};'
-            'SERVER=DESKTOP-2EURPRO\\CONTPAQ;'
+            'DRIVER={SQL Server};'
+            'SERVER=LAPTOP-LV\\CONTPAC;'
             'DATABASE=adCARDENAS_E_HIJOS_SA;'
             'UID=sa;'
             'PWD=lkqaz923'
@@ -26,7 +26,7 @@ def obtener_producto_por_codigo(codigo):
                 aP.CCODIGOPRODUCTO AS codigo,
                 aP.CNOMBREPRODUCTO AS nombre,
                 admExistenciaCosto.CENTRADASPERIODO12 - admExistenciaCosto.CSALIDASPERIODO12 AS existencia,
-                ROUND(aP.CPRECIO1, 2) AS sucursales_Xalapa,
+                ROUND(aP.CPRECIO1, 2) AS precio,
                 ROUND(aP.CPRECIO2, 2) AS mayoreo_Xalapa
             FROM
                 [adCARDENAS_E_HIJOS_SA].[dbo].[admExistenciaCosto]
@@ -34,7 +34,7 @@ def obtener_producto_por_codigo(codigo):
             INNER JOIN admAlmacenes aA ON admExistenciaCosto.CIDALMACEN = aA.CIDALMACEN
             INNER JOIN admEjercicios aE ON admExistenciaCosto.CIDEJERCICIO = aE.CIDEJERCICIO
             WHERE 
-                aE.CEJERCICIO = YEAR(GETDATE()) 
+                aE.CEJERCICIO = 2024
                 AND aP.CSTATUSPRODUCTO = 1 
                 AND aA.CNOMBREALMACEN = 'ALMACEN ORIZABA'
                 AND (aP.CCODALTERN = ? OR aP.CCODIGOPRODUCTO = ?)
@@ -43,7 +43,7 @@ def obtener_producto_por_codigo(codigo):
         resultado = cursor.fetchone()
         if resultado:
             nombre = resultado.nombre
-            precio = resultado.sucursales_Xalapa  # o puedes usar mayoreo_Xalapa
+            precio = resultado.precio * 1.16 # o puedes usar mayoreo_Xalapa
             return nombre, precio
         else:
             return None, None
