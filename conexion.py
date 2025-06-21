@@ -34,7 +34,7 @@ def obtener_producto_por_codigo(codigo):
             INNER JOIN admAlmacenes aA ON admExistenciaCosto.CIDALMACEN = aA.CIDALMACEN
             INNER JOIN admEjercicios aE ON admExistenciaCosto.CIDEJERCICIO = aE.CIDEJERCICIO
             WHERE 
-                aE.CEJERCICIO = 2024
+                aE.CEJERCICIO = YEAR(GETDATE())
                 AND aP.CSTATUSPRODUCTO = 1 
                 AND aA.CNOMBREALMACEN = 'ALMACEN ORIZABA'
                 AND (aP.CCODALTERN = ? OR aP.CCODIGOPRODUCTO = ?)

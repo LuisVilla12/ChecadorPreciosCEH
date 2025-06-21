@@ -2,6 +2,15 @@ import tkinter as tk
 from PIL import Image, ImageTk
 from conexion import obtener_producto_por_codigo
 import os
+import sys  # importante para PyInstaller
+
+def resource_path(relative_path):
+    """Obtiene la ruta absoluta al recurso, funciona con PyInstaller."""
+    try:
+        base_path = sys._MEIPASS  # al empaquetar como .exe
+    except AttributeError:
+        base_path = os.path.abspath(".")  # al correr como .py
+    return os.path.join(base_path, relative_path)
 
 def buscar_producto():
     codigo = entry_codigo.get().strip()
@@ -46,7 +55,7 @@ frame_superior.grid(row=0, column=0)
 
 # Cargar logo
 try:
-    ruta_logo = os.path.join(os.path.dirname(__file__), "logo_a.png")
+    ruta_logo = resource_path("logo_a.png")
     logo_img = Image.open(ruta_logo)
     logo_img = logo_img.resize((700, 300), Image.Resampling.LANCZOS)
     logo = ImageTk.PhotoImage(logo_img)
@@ -71,9 +80,7 @@ etiqueta_precio.grid(row=1, column=0)
 etiqueta_producto = tk.Label(ventana, text="", font=("Helvetica", 30, "bold"), fg="black", bg="#D9D9D9")
 etiqueta_producto.grid(row=2, column=0)
 
-
 # Salida con ESC
 ventana.bind('<Escape>', lambda e: ventana.destroy())
 
 ventana.mainloop()
-
