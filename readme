@@ -1,0 +1,3 @@
+EJECUTAR
+Para instalar dependencias
+pip freeze > requirements.txt
